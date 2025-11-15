@@ -152,10 +152,17 @@ class VectorStore:
 
 class RAGQueryProcessor:
     def __init__(self):
-        if not config.GEMINI_API_KEY:
-            raise ValueError("GEMINI_API_KEY is not set.")
-        genai.configure(api_key=config.GEMINI_API_KEY)
-        
+        # When running on Google Cloud, authentication is handled automatically
+        # by the service account. The API key is only needed for local development.
+        if "K_SERVICE" in os.environ:
+            # Authenticate using Application Default Credentials
+            genai.configure()
+        else:
+            # For local development, require the API key
+            if not config.GEMINI_API_KEY:
+                raise ValueError("GEMINI_API_KEY is not set. Please set it in your .env file for local development.")
+            genai.configure(api_key=config.GEMINI_API_KEY)
+
         self.model = genai.GenerativeModel(config.GEMINI_MODEL_NAME)
         self.vector_store = VectorStore()
         self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
