@@ -42,24 +42,40 @@ def get_messages() -> List[dict]:
     offset = 0
 
     page = 0
-    while True:
-        page += 1
-        items, reported_total = _fetch_page(offset)
-        records.extend(items)
+    try:
+        while True:
+            page += 1
+            try:
+                items, reported_total = _fetch_page(offset)
+            except requests.exceptions.HTTPError as e:
+                status = e.response.status_code if e.response is not None else None
+                if status in {400, 401, 402, 403, 404, 405}:
+                    logger.warning(
+                        "Received %s from API while paging; returning records fetched so far.",
+                        status,
+                    )
+                    break
+                raise
 
-        logger.info(
-            "Fetched page %s (offset=%s, page_size=%s, cumulative_messages=%s, total=%s)",
-            page,
-            offset,
-            len(items),
-            len(records),
-            reported_total,
-        )
+            records.extend(items)
 
-        if not items or len(records) >= reported_total:
-            break
+            logger.info(
+                "Fetched page %s (offset=%s, page_size=%s, cumulative_messages=%s, total=%s)",
+                page,
+                offset,
+                len(items),
+                len(records),
+                reported_total,
+            )
 
-        offset += len(items) or MESSAGES_API_PAGE_SIZE
+            if not items or len(records) >= reported_total:
+                break
+
+            offset += len(items) or MESSAGES_API_PAGE_SIZE
+
+    except requests.exceptions.RequestException as e:
+        logger.error("Request to messages API failed (%s).", e)
+        raise
 
     logger.info(
         "Fetched %s messages from the public API.",
