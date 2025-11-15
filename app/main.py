@@ -19,6 +19,10 @@ class Question(BaseModel):
 class Answer(BaseModel):
     answer: str
 
+@app.get("/")
+def read_root():
+    return {"status": "ok"}
+
 @app.post("/ask", response_model=Answer)
 def ask_question(question: Question):
     """

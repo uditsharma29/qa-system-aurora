@@ -14,5 +14,7 @@ COPY ./app /app/app
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
 
+EXPOSE 8080
+
 # Run the application using uvicorn as a module
 CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
