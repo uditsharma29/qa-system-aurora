@@ -1,0 +1,8 @@
+fastapi
+pydantic
+requests
+google-generativeai
+sentence-transformers
+python-dotenv
+faiss-cpu
+numpy

@@ -1,0 +1,6 @@
+__pycache__/
+.venv
+venv/
+.env
+vector_store.pkl
+.DS_Store
