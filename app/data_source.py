@@ -7,8 +7,8 @@ import requests
 logger = logging.getLogger(__name__)
 
 MESSAGES_API_URL = "https://november7-730026606190.europe-west1.run.app/messages"
-MESSAGES_API_PAGE_SIZE = 1000
-MESSAGES_API_TIMEOUT = 20
+MESSAGES_API_PAGE_SIZE = 3500
+MESSAGES_API_TIMEOUT = 60
 
 
 def _fetch_page(offset: int) -> Tuple[List[dict], int]:
