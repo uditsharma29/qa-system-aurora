@@ -20,7 +20,7 @@ class Answer(BaseModel):
     answer: str
 
 @app.get("/")
-def read_root():
+def health_check():
     return {"status": "ok"}
 
 @app.post("/ask", response_model=Answer)
