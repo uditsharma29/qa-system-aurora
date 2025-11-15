@@ -57,6 +57,10 @@ class VectorStore:
         logger.info(f"Cache not found at {CACHE_PATH}. Building VectorStore from scratch...")
         print("Building new vector store cache...")
         self.documents = self._prepare_documents()
+        
+        if not self.documents:
+            raise RuntimeError("Failed to build vector store: No documents were found after fetching from the data source.")
+
         self.embeddings = self._embed_documents()
         self.index = self._create_faiss_index()
         
