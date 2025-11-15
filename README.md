@@ -1,3 +1,12 @@
+---
+title: Simple QA System
+emoji: 🤗
+colorFrom: blue
+colorTo: green
+sdk: docker
+pinned: false
+---
+
 # Simple QA System
 
 This project is a retrieval-augmented generation (RAG) service that answers natural-language questions about member data sourced from a public API.
