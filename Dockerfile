@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the application code
 COPY ./app /app/app
+COPY ./data /app/data
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1

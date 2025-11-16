@@ -27,29 +27,36 @@ class FakeEmbedder:
         return np.asarray(vectors, dtype=np.float32)
 
 
-class VectorStoreTests(unittest.TestCase):
-    def test_search_returns_relevant_documents(self):
-        fake_messages = [
-            {"user_name": "Layla", "message": "Planning a London trip next month"},
-            {"user_name": "Vikram", "message": "Needs another car detail"},
+class RAGQASystemTests(unittest.TestCase):
+    @mock.patch("os.path.exists", return_value=False)
+    @mock.patch("app.rag_qa_system.get_messages")
+    def test_vector_store_builds_and_searches(self, mock_get_messages, mock_exists):
+        mock_get_messages.return_value = [
+            {"user_name": "Layla", "message": "I'm planning a trip to London next month."},
+            {"user_name": "Vikram", "message": "I need a car in New York."},
         ]
 
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cache_path = os.path.join(tmpdir, "vector_store.pkl")
-            with mock.patch("app.rag_qa_system.CACHE_PATH", cache_path):
-                with mock.patch(
-                    "app.rag_qa_system.SentenceTransformer", return_value=FakeEmbedder()
-                ):
-                    with mock.patch(
-                        "app.rag_qa_system.get_messages", return_value=fake_messages
-                    ):
-                        store = rag_qa_system.VectorStore()
-                        results = store.search(
-                            "When is Layla planning her trip to London?", k=2
-                        )
+        # In-memory vector store for testing
+        store = rag_qa_system.VectorStore()
 
-        self.assertEqual(len(results), 2)
-        self.assertTrue(results[0].startswith("Layla"))
+        # Test document preparation
+        self.assertEqual(len(store.documents), 2)
+        self.assertIn("Layla: I'm planning a trip to London next month.", store.documents)
+
+        # Test search
+        results = store.search("When is the London trip?", k=1)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0], "Layla: I'm planning a trip to London next month.")
+
+    @mock.patch("os.path.exists", return_value=False)
+    @mock.patch("app.rag_qa_system.get_messages")
+    def test_vector_store_raises_error_on_no_documents(self, mock_get_messages, mock_exists):
+        mock_get_messages.return_value = []
+
+        with self.assertRaisesRegex(
+            RuntimeError, "Failed to build vector store: No documents were found"
+        ):
+            rag_qa_system.VectorStore()
 
 
 if __name__ == "__main__":
